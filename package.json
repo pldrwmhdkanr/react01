@@ -22,9 +22,11 @@
   "homepage": "https://github.com/pldrwmhdkanr/react01#readme",
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.2",
+    "tailwindcss": "^4.1.18",
     "vite": "^7.3.0"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   }
