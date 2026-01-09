@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 
 const PrismBackground = () => {
@@ -10,22 +9,26 @@ const PrismBackground = () => {
     const ctx = canvas.getContext('2d');
     let width, height;
     let frameId;
+    let lastTime = 0;
+    const FPS = 30; // Limit to 30fps for performance
+    const frameInterval = 1000 / FPS;
 
-    // Prism colors config
+    // Vibrant prism colors - much brighter!
     const colors = [
-        [30, 0, 60],    // Deep Purple
-        [0, 0, 40],     // Dark Blue
-        [60, 0, 80],    // Magenta
-        [10, 20, 40],   // Cyan-Dark
+      [139, 92, 246],   // Violet-500
+      [59, 130, 246],   // Blue-500
+      [168, 85, 247],   // Purple-500
+      [6, 182, 212],    // Cyan-500
+      [236, 72, 153],   // Pink-500
     ];
     
-    // Gradient blobs
-    const blobs = colors.map(() => ({
+    // Gradient blobs with varied sizes
+    const blobs = colors.map((_, i) => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
-      r: Math.min(window.innerWidth, window.innerHeight) * 0.8
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: Math.min(window.innerWidth, window.innerHeight) * (0.4 + i * 0.1)
     }));
 
     const resize = () => {
@@ -35,31 +38,39 @@ const PrismBackground = () => {
       canvas.height = height;
     };
 
-    const draw = () => {
-      // Clear with slight fade for trail effect (optional, but here we just redraw)
-      ctx.clearRect(0, 0, width, height); // Transparent clear
+    const draw = (currentTime) => {
+      frameId = requestAnimationFrame(draw);
+      
+      // Throttle to target FPS
+      const elapsed = currentTime - lastTime;
+      if (elapsed < frameInterval) return;
+      lastTime = currentTime - (elapsed % frameInterval);
 
-      // Blobs simulation
+      // Fill with base dark color first
+      ctx.fillStyle = 'rgb(0, 0, 0)';
+      ctx.fillRect(0, 0, width, height);
+
+      // Update blob positions
       blobs.forEach(blob => {
         blob.x += blob.vx;
         blob.y += blob.vy;
 
-        // Bounce
-        if (blob.x < -blob.r || blob.x > width + blob.r) blob.vx *= -1;
-        if (blob.y < -blob.r || blob.y > height + blob.r) blob.vy *= -1;
+        // Bounce off edges
+        if (blob.x < -blob.r * 0.5 || blob.x > width + blob.r * 0.5) blob.vx *= -1;
+        if (blob.y < -blob.r * 0.5 || blob.y > height + blob.r * 0.5) blob.vy *= -1;
       });
 
-      // Draw composite gradient
-      // Use efficient composition
-      ctx.globalCompositeOperation = 'screen'; // Use screen for vibrant overlap
+      // Draw blobs with additive blending for vibrant overlap
+      ctx.globalCompositeOperation = 'screen';
       
       blobs.forEach((blob, i) => {
         const gradient = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.r);
         const [r, g, b] = colors[i % colors.length];
         
-        // "Prism" feel comes from overlapping vivid colors
-        gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.8)`);
-        gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, 0.2)`);
+        // Higher opacity for more visible colors
+        gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.6)`);
+        gradient.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, 0.3)`);
+        gradient.addColorStop(0.7, `rgba(${r}, ${g}, ${b}, 0.1)`);
         gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
 
         ctx.fillStyle = gradient;
@@ -69,15 +80,11 @@ const PrismBackground = () => {
       });
 
       ctx.globalCompositeOperation = 'source-over';
-      
-      // Noise overlay for texture (optional but adds "material" feel)
-      
-      frameId = requestAnimationFrame(draw);
     };
 
     window.addEventListener('resize', resize);
     resize();
-    draw();
+    frameId = requestAnimationFrame(draw);
 
     return () => {
       window.removeEventListener('resize', resize);
@@ -89,7 +96,7 @@ const PrismBackground = () => {
     <canvas 
       ref={canvasRef}
       className="fixed inset-0 w-full h-full -z-10 pointer-events-none"
-      style={{ filter: 'blur(80px)' }} // Heavy blur to merge blobs into a fluid gradient
+      style={{ filter: 'blur(60px)' }} // Reduced blur for better visibility
     />
   );
 };

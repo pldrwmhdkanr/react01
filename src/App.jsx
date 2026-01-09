@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useAnimation } from "framer-motion";
 
-import PrismBackground from './components/PrismBackground';
-import TargetCursor from './components/TargetCursor';
+import Aurora from './components/Aurora';
+import SplashCursor from './components/SplashCursor';
+import ShinyText from './components/ShinyText';
+import WorkCountdown from './components/WorkCountdown';
 import ShanghaiMap from './assets/shanghai_map_dark.png';
+import myAvatar from './assets/sang.jpg';
 
 // --- Framer Motion Variants ---
 
@@ -33,10 +36,11 @@ const itemVariants = {
 };
 
 // --- 组件: 聚光灯增强卡片 (Spotlight Card) ---
-const Card = ({ children, className = "", noHover = false, onClick, spotlightColor = "rgba(255, 255, 255, 0.15)" }) => {
+const Card = ({ children, className = "", noHover = false, onClick, spotlightColor = "rgba(139, 92, 246, 0.25)" }) => {
     const divRef = useRef(null);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [opacity, setOpacity] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
 
     const handleMouseMove = (e) => {
         if (!divRef.current) return;
@@ -45,46 +49,60 @@ const Card = ({ children, className = "", noHover = false, onClick, spotlightCol
         setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     };
 
-    const handleFocus = () => {
-        setOpacity(1);
-    };
-
-    const handleBlur = () => {
-        setOpacity(0);
-    };
-
     const handleMouseEnter = () => {
         setOpacity(1);
+        setIsHovered(true);
     };
 
     const handleMouseLeave = () => {
         setOpacity(0);
+        setIsHovered(false);
     };
 
     return (
         <motion.div
             ref={divRef}
             onMouseMove={handleMouseMove}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             variants={itemVariants}
             whileHover={noHover ? {} : { 
-                y: -5,
-                transition: { type: "spring", stiffness: 300 }
+                y: -8,
+                scale: 1.02,
+                transition: { type: "spring", stiffness: 300, damping: 20 }
             }}
             whileTap={{ scale: 0.98 }}
             onClick={onClick}
-            className={`card relative overflow-hidden rounded-3xl border border-white/20 bg-white/5 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] ${className}`}
+            className={`card relative overflow-hidden rounded-3xl bg-white/10 backdrop-blur-2xl ${className}`}
+            style={{
+                border: isHovered ? '1px solid rgba(139, 92, 246, 0.5)' : '1px solid rgba(255, 255, 255, 0.15)',
+                boxShadow: isHovered 
+                    ? '0 25px 50px -12px rgba(139, 92, 246, 0.25), 0 0 0 1px rgba(139, 92, 246, 0.1), inset 0 1px 0 rgba(255,255,255,0.1)' 
+                    : '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+                transition: 'border 0.3s ease, box-shadow 0.3s ease',
+            }}
         >
+            {/* Glass inner glow */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none" />
+            
+            {/* Spotlight effect */}
             <div
-                className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 z-30"
+                className="pointer-events-none absolute -inset-px transition-opacity duration-300 z-30 rounded-3xl"
                 style={{
                     opacity,
-                    background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 40%)`,
+                    background: `radial-gradient(800px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 40%)`,
                 }}
             />
+            
+            {/* Border glow on hover */}
+            <div 
+                className="absolute inset-0 rounded-3xl pointer-events-none transition-opacity duration-300"
+                style={{
+                    opacity: isHovered ? 1 : 0,
+                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, transparent 50%, rgba(59, 130, 246, 0.1) 100%)',
+                }}
+            />
+            
             <div className="relative z-20 h-full">
                 {children}
             </div>
@@ -180,8 +198,8 @@ function App() {
 
     return (
         <div className="min-h-screen bg-black pb-20 relative overflow-x-hidden selection:bg-purple-500/30 selection:text-white">
-            <PrismBackground />
-            <TargetCursor />
+            <Aurora colorStops={['#8B5CF6', '#06B6D4', '#8B5CF6']} speed={0.8} />
+            <SplashCursor />
 
             {/* 隐藏的音频元素 */}
             <audio 
@@ -209,13 +227,13 @@ function App() {
                             whileHover={{ rotate: 10, scale: 1.1 }}
                         >
                             <img 
-                                src="https://api.dicebear.com/9.x/notionists/svg?seed=Felix" 
+                                src={myAvatar} 
                                 alt="Avatar" 
                                 className="w-full h-full object-cover bg-indigo-500/20"
                             />
                         </motion.div>
                         <h1 className="text-4xl font-bold tracking-tight mb-3 text-white">
-                            你好，我是 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Xueyanlei。</span>
+                            你好，我是 <ShinyText text="桑志涛。" speed={3} color="#a78bfa" shineColor="#ffffff" className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400" />
                         </h1>
                         <p className="text-lg text-gray-400 leading-relaxed font-light">
                             用心雕琢代码，构建 <br/>
@@ -448,6 +466,11 @@ function App() {
                         </div>
                         <div className="text-[10px] uppercase text-indigo-300 tracking-wider mt-1">Shanghai</div>
                      </div>
+                </Card>
+
+                {/* 12. 下班倒计时 (1x1) */}
+                <Card className="md:col-span-1 md:row-span-1 p-4 flex flex-col justify-center items-center bg-gradient-to-br from-emerald-900/30 to-teal-900/30 border-emerald-500/20">
+                    <WorkCountdown targetHour={17} targetMinute={0} />
                 </Card>
 
             </motion.div>
