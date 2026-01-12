@@ -270,9 +270,23 @@ function App() {
                         />
                     </div>
                     {/* 雷达波 */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                        <span className="absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75 animate-ping"></span>
-                        <div className="relative inline-flex rounded-full h-3 w-3 bg-blue-500 border-2 border-white shadow-[0_0_20px_rgba(59,130,246,0.8)]"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                        {/* Inner Wave - Strong & Sharp */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: [0, 0.8, 0], scale: [0, 6] }}
+                            transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
+                            className="absolute w-10 h-10 rounded-full border-2 border-blue-400/80 bg-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.6)]"
+                        />
+                        {/* Outer Wave - Wide Reach */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: [0, 0.6, 0], scale: [0, 10] }}
+                            transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut", delay: 1 }}
+                            className="absolute w-10 h-10 rounded-full border border-blue-400/50 shadow-[0_0_30px_rgba(59,130,246,0.4)]"
+                        />
+                        {/* Center Dot */}
+                         <div className="relative inline-flex rounded-full h-4 w-4 bg-blue-500 border-2 border-white shadow-[0_0_25px_rgba(59,130,246,1)] z-10"></div>
                     </div>
                     
                     <div className="absolute bottom-4 left-4">
